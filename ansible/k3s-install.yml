@@ -1,0 +1,19 @@
+---
+- name: Lightweight k3s Cluster Setup
+  hosts: k3s_master
+  become: yes
+  tasks:
+    - name: Install k3s Server (Control Plane)
+      shell: curl -sfL https://get.k3s.io | sh -
+      # K3s includes a built-in Load Balancer and Helm controller by default.
+
+- name: Join Worker Nodes
+  hosts: k3s_workers
+  become: yes
+  vars:
+    # In a real scenario, I'd pull this token dynamically
+    k3s_token: "K10...YOUR_TOKEN_HERE"
+    master_ip: "192.168.1.10"
+  tasks:
+    - name: Install k3s Agent and Join Cluster
+      shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ master_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -"
